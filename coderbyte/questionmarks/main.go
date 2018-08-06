@@ -8,66 +8,53 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
 
-func findNext(startPosition int, str string) (position, number int, isMore bool) {
-	var char rune
-	var err error
-	isMore = false
-	for position, char = range str {
-		if position <= startPosition {
-			continue
-		}
-		number, err = strconv.Atoi(string(char))
-		if err == nil {
-			break
-		}
-	}
-	oldPosition := position
-	for pos, c := range str {
-		if pos <= oldPosition {
-			continue
-		}
-		_, err = strconv.Atoi(string(c))
-		if err == nil {
-			isMore = true
-		}
-	}
-
-	return
-}
-
-func exactly3QMarks(oldPosition, position int, str string) bool {
-	var qMarks []string
-	for ; oldPosition < position; oldPosition++ {
-		if string(str[oldPosition]) == "?" {
-			qMarks = append(qMarks, string(str[oldPosition]))
+func threeQMarks(chars []string) bool {
+	count := 0
+	for _, char := range chars {
+		if char == "?" {
+			count++
 		}
 
 	}
 
-	if len(qMarks) == 3 {
+	if count == 3 {
 		return true
 	}
 
 	return false
 }
 
+func findSets(str string) (sets [][]string) {
+	for position, char := range str {
+		num, err := strconv.Atoi(string(char))
+		if err == nil {
+			for nextPosition, nextChar := range str[position+1:] {
+				nextNum, err := strconv.Atoi(string(nextChar))
+				if err == nil {
+					if num+nextNum == 10 {
+						set := strings.Split(str[position:position+nextPosition+2], "")
+						sets = append(sets, set)
+					}
+				}
+			}
+		}
+	}
+
+	return
+}
+
 func QuestionsMarks(str string) string {
 	truthy := "false"
-	position := 0
-	number := 0
-	isMore := true
-	for isMore {
-		lastNumber := number
-		lastPosition := position
-		position, number, isMore = findNext(position, str)
-		if lastNumber+number == 10 {
-			if exactly3QMarks(lastPosition, position, str) {
-				truthy = "true"
-			} else {
-				truthy = "false"
-			}
+
+	sets := findSets(str)
+	for _, set := range sets {
+		if threeQMarks(set) {
+			truthy = "true"
+		} else {
+			return "false"
 		}
 	}
 
